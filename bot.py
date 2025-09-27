@@ -27,8 +27,7 @@ async def send_welcome(message: types.Message):
     keyboard = ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text="📅 Записаться на диагностику")],
-            [KeyboardButton(text="ℹ️ О школе"), KeyboardButton(text="📂 Материалы")],
-            [KeyboardButton(text="💬 FAQ"), KeyboardButton(text="🏆 Результаты учеников")]
+            [KeyboardButton(text="ℹ️ О школе"), KeyboardButton(text="📂 Материалы")]
         ],
         resize_keyboard=True
     )
