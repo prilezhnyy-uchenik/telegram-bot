@@ -51,6 +51,7 @@ async def handle_booking(message: types.Message):
     kb = InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton(text="✅ Согласен", callback_data="accept_offer")],
+            [InlineKeyboardButton(text="📝 Согласие на обработку персональных данных", url="https://example.com/offer.pdf")],
             [InlineKeyboardButton(text="📄 Полная оферта (PDF)", url="https://example.com/offer.pdf")]
         ]
     )
