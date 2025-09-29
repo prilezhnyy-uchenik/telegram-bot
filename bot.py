@@ -14,6 +14,9 @@ TOKEN = os.getenv("BOT_TOKEN")
 bot = Bot(token=TOKEN)
 dp = Dispatcher(storage=MemoryStorage())
 
+# 👉 Укажи свой Telegram ID (узнать можно у @userinfobot)
+ADMIN_ID = 708095106
+
 # ---------- Машина состояний для записи ----------
 class BookingForm(StatesGroup):
     name = State()
@@ -100,6 +103,17 @@ async def form_contact(message: types.Message, state: FSMContext):
             f"{data['name']} | {data['school_class']} | {data['subject']} | {data['contact']} | "
             f"TelegramID: {message.from_user.id}\n"
         )
+
+    # 👉 Отправляем админу заявку
+    await bot.send_message(
+        ADMIN_ID,
+        f"📩 Новая заявка:\n\n"
+        f"👤 ФИО: {data['name']}\n"
+        f"🏫 Класс: {data['school_class']}\n"
+        f"📘 Предмет: {data['subject']}\n"
+        f"☎ Контакт: {data['contact']}\n"
+        f"🆔 TelegramID: {message.from_user.id}"
+    )
 
     await message.answer(
         "✅ Ваша заявка успешно принята!\n\n"
