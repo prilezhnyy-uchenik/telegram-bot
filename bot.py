@@ -14,10 +14,10 @@ TOKEN = os.getenv("BOT_TOKEN")
 bot = Bot(token=TOKEN)
 dp = Dispatcher(storage=MemoryStorage())
 
-# 👉 Укажи свой Telegram ID (узнать можно у @userinfobot)
+# 👉 Укажи свой Telegram ID
 ADMIN_ID = 708095106
 
-# ---------- Машина состояний для записи ----------
+# ---------- Машина состояний ----------
 class BookingForm(StatesGroup):
     name = State()
     school_class = State()
@@ -29,6 +29,7 @@ class BookingForm(StatesGroup):
 async def send_welcome(message: types.Message):
     keyboard = ReplyKeyboardMarkup(
         keyboard=[
+            [KeyboardButton(text="📅 Записаться на диагностику")],
             [KeyboardButton(text="📅 Записаться на годовой курс")],
             [KeyboardButton(text="ℹ️ О школе"), KeyboardButton(text="📂 Материалы")]
         ],
@@ -39,10 +40,29 @@ async def send_welcome(message: types.Message):
         reply_markup=keyboard
     )
 
-# ---------- Нажатие "Записаться на диагностику" ----------
+# ---------- Диагностика ----------
+@dp.message(F.text == "📅 Записаться на диагностику")
+async def handle_diagnostic(message: types.Message):
+    text = (
+        "Перед записью ознакомьтесь с условиями:\n\n"
+        "Мы предоставляем бесплатную диагностику знаний. "
+        "Дальнейшее обучение осуществляется на платной основе. "
+        "Нажимая кнопку ниже, вы соглашаетесь с условиями."
+    )
+
+    kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="✅ Согласен", callback_data="diagnostic_accept")],
+            [InlineKeyboardButton(text="📝 Согласие на обработку персональных данных", callback_data="diagnostic_personal")]
+        ]
+    )
+
+    await message.answer(text, reply_markup=kb)
+
+# ---------- Годовой курс ----------
 @dp.message(F.text == "📅 Записаться на годовой курс")
-async def handle_booking(message: types.Message):
-    offer_text = (
+async def handle_course(message: types.Message):
+    text = (
         "Перед записью ознакомьтесь с условиями оферты:\n\n"
         "Дальнейшее обучение осуществляется на платной основе. "
         "Нажимая кнопку ниже, вы соглашаетесь с условиями."
@@ -50,29 +70,42 @@ async def handle_booking(message: types.Message):
 
     kb = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="✅ Согласен", callback_data="accept_offer")],
-            [InlineKeyboardButton(text="📝 Согласие на обработку персональных данных", url="https://example.com/offer.pdf")],
+            [InlineKeyboardButton(text="✅ Согласен", callback_data="course_accept")],
+            [InlineKeyboardButton(text="📝 Согласие на обработку персональных данных", callback_data="course_personal")],
             [InlineKeyboardButton(text="📄 Полная оферта (PDF)", url="https://example.com/offer.pdf")]
         ]
     )
 
-    await message.answer(offer_text, reply_markup=kb)
+    await message.answer(text, reply_markup=kb)
 
-# ---------- Нажатие "Согласен" ----------
-@dp.callback_query(F.data == "accept_offer")
-async def accept_offer(callback: types.CallbackQuery, state: FSMContext):
+# ---------- Обработка согласия (общая функция) ----------
+async def start_form(callback: types.CallbackQuery, state: FSMContext, booking_type: str):
     user_id = callback.from_user.id
     username = callback.from_user.username
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # Сохраняем факт акцепта в файл (можно заменить на БД)
     with open("offers_log.txt", "a", encoding="utf-8") as f:
-        f.write(f"{now} | {user_id} | @{username}\n")
+        f.write(f"{now} | {booking_type} | {user_id} | @{username}\n")
 
-    await callback.message.answer("Спасибо! Теперь заполните форму для записи.\n\nВведите ФИО:")
+    await callback.message.answer(f"Спасибо! Теперь заполните форму для записи ({booking_type}).\n\nВведите ФИО:")
+    await state.update_data(booking_type=booking_type)  # сохраняем тип заявки
     await state.set_state(BookingForm.name)
 
-# ---------- Пошаговая форма ----------
+# ---------- Callbacks ----------
+@dp.callback_query(F.data == "diagnostic_accept")
+async def diagnostic_accept(callback: types.CallbackQuery, state: FSMContext):
+    await start_form(callback, state, "Диагностика")
+
+@dp.callback_query(F.data == "course_accept")
+async def course_accept(callback: types.CallbackQuery, state: FSMContext):
+    await start_form(callback, state, "Годовой курс")
+
+@dp.callback_query(F.data.contains("personal"))
+async def personal_data(callback: types.CallbackQuery):
+    await callback.message.answer("Вы дали согласие на обработку персональных данных ✅")
+    await callback.answer()
+
+# ---------- Форма ----------
 @dp.message(BookingForm.name)
 async def form_name(message: types.Message, state: FSMContext):
     await state.update_data(name=message.text)
@@ -96,18 +129,17 @@ async def form_contact(message: types.Message, state: FSMContext):
     await state.update_data(contact=message.text)
     data = await state.get_data()
 
-    # Сохраняем анкету в файл (потом можно в БД)
+    # Сохраняем в файл
     with open("bookings.txt", "a", encoding="utf-8") as f:
         f.write(
-            f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | "
-            f"{data['name']} | {data['school_class']} | {data['subject']} | {data['contact']} | "
-            f"TelegramID: {message.from_user.id}\n"
+            f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | {data['booking_type']} | "
+            f"{data['name']} | {data['school_class']} | {data['subject']} | {data['contact']} | TelegramID: {message.from_user.id}\n"
         )
 
-    # 👉 Отправляем админу заявку
+    # Отправляем админу
     await bot.send_message(
         ADMIN_ID,
-        f"📩 Новая заявка:\n\n"
+        f"📩 Новая заявка ({data['booking_type']}):\n\n"
         f"👤 ФИО: {data['name']}\n"
         f"🏫 Класс: {data['school_class']}\n"
         f"📘 Предмет: {data['subject']}\n"
