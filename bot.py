@@ -170,8 +170,19 @@ def get_offer():
     return FileResponse("static/offer.pdf", media_type="application/pdf")
 
 # ---------- Запуск ----------
-async def main():
+async def start_bot():
     await dp.start_polling(bot)
 
-if __name__ == "__main__": 
+async def start_server():
+    config = uvicorn.Config(app, host="0.0.0.0", port=int(os.getenv("PORT", 8000)))
+    server = uvicorn.Server(config)
+    await server.serve()
+
+async def main():
+    await asyncio.gather(
+        start_bot(),
+        start_server()
+    )
+
+if __name__ == "__main__":
     asyncio.run(main())
