@@ -173,7 +173,5 @@ def get_offer():
 async def main():
     await dp.start_polling(bot)
 
-if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.create_task(start_bot())
-    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8000)))
+if __name__ == "__main__": 
+    asyncio.run(main())
