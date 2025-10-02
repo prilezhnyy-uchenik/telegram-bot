@@ -1,6 +1,10 @@
 import asyncio
 import os
 from datetime import datetime
+from fastapi import FastAPI
+from fastapi.responses import FileResponse
+import uvicorn
+
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.filters import Command
@@ -154,9 +158,22 @@ async def form_contact(message: types.Message, state: FSMContext):
     )
     await state.clear()
 
+# ===== СЕРВЕР =====
+app = FastAPI()
+
+@app.get("/")
+def home():
+    return {"status": "ok", "message": "Bot + Server running"}
+
+@app.get("/offer")
+def get_offer():
+    return FileResponse("static/offer.pdf", media_type="application/pdf")
+
 # ---------- Запуск ----------
-async def main():
+async def start_bot():
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    loop = asyncio.get_event_loop()
+    loop.create_task(start_bot())
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8000)))
