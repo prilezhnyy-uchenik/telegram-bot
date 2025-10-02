@@ -56,8 +56,10 @@ async def handle_diagnostic(message: types.Message):
 
     kb = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="✅ Согласен", callback_data="diagnostic_accept")],
-            [InlineKeyboardButton(text="📝 Согласие на обработку персональных данных", callback_data="diagnostic_personal")]
+            [InlineKeyboardButton(text="✅ Согласен(а)", callback_data="diagnostic_accept")],
+            [InlineKeyboardButton(
+                text="📝 Согласие на обработку персональных данных (PDF)",
+                url="https://telegram-bot-production-534b.up.railway.app/consent")]
         ]
     )
 
@@ -74,9 +76,13 @@ async def handle_course(message: types.Message):
 
     kb = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="✅ Согласен", callback_data="course_accept")],
-            [InlineKeyboardButton(text="📝 Согласие на обработку персональных данных", callback_data="course_personal")],
-            [InlineKeyboardButton(text="📄 Полная оферта (PDF)", url="https://telegram-bot-production-534b.up.railway.app/offer")]
+            [InlineKeyboardButton(text="✅ Согласен(а)", callback_data="course_accept")],
+            [InlineKeyboardButton(
+                text="📝 Согласие на обработку персональных данных (PDF)",
+                url="https://telegram-bot-production-534b.up.railway.app/consent")],
+            [InlineKeyboardButton(
+                text="📝 Полная оферта (PDF)",
+                url="https://telegram-bot-production-534b.up.railway.app/offer")]
         ]
     )
 
@@ -106,7 +112,6 @@ async def course_accept(callback: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query(F.data.contains("personal"))
 async def personal_data(callback: types.CallbackQuery):
-    await callback.message.answer("Вы дали согласие на обработку персональных данных ✅")
     await callback.answer()
 
 # ---------- Форма ----------
@@ -168,6 +173,10 @@ def home():
 @app.get("/offer")
 def get_offer():
     return FileResponse("static/offer.pdf", media_type="application/pdf")
+
+@app.get("/consent")
+def get_consent():
+    return FileResponse("static/consent.pdf", media_type="application/pdf")
 
 # ---------- Запуск ----------
 async def start_bot():
