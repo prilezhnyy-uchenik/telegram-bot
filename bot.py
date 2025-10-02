@@ -76,7 +76,7 @@ async def handle_course(message: types.Message):
         inline_keyboard=[
             [InlineKeyboardButton(text="✅ Согласен", callback_data="course_accept")],
             [InlineKeyboardButton(text="📝 Согласие на обработку персональных данных", callback_data="course_personal")],
-            [InlineKeyboardButton(text="📄 Полная оферта (PDF)", url="https://telegram-bot-production-4201.up.railway.app/offer")]
+            [InlineKeyboardButton(text="📄 Полная оферта (PDF)", url="telegram-bot-production-6ddb.up.railway.app/offer")]
         ]
     )
 
