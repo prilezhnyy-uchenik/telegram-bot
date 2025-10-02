@@ -36,7 +36,7 @@ async def send_welcome(message: types.Message):
             [KeyboardButton(text="📊 Тарифы и цены")], 
             [KeyboardButton(text="📅 Записаться на диагностику")],
             [KeyboardButton(text="📚 Записаться на годовой курс")],
-            [KeyboardButton(text="📚 Индивидуальное занятие")],
+            [KeyboardButton(text="👨‍🏫 Индивидуальное занятие")],
             [KeyboardButton(text="ℹ️ О школе"), KeyboardButton(text="📂 Материалы")]
         ],
         resize_keyboard=True
@@ -202,11 +202,24 @@ async def form_contact(message: types.Message, state: FSMContext):
         f"🆔 TelegramID: {message.from_user.id}"
     )
 
+    # Кнопки для оплаты
+    kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(
+                text="💳 Оплатить месяц — 10 000 ₽",
+                url="https://yoomoney.ru/quickpay/shop-widget?writer=seller&targets=Оплата%20месяца&default-sum=10000&button-text=11&payment-type-choice=on&comment=on&successURL=https://t.me/YourBotUsername")],
+            [InlineKeyboardButton(
+                text="💳 Оплатить год — 75 000 ₽",
+                url="https://yoomoney.ru/quickpay/shop-widget?writer=seller&targets=Оплата%20года&default-sum=75000&button-text=11&payment-type-choice=on&comment=on&successURL=https://t.me/YourBotUsername")]
+        ]
+    )
+
     await message.answer(
         "✅ Ваша заявка успешно принята!\n\n"
-        "Реквизиты для оплаты будут отправлены отдельно.\n"
-        "Спасибо, что выбрали нашу школу!"
+        "Теперь выберите способ оплаты:",
+        reply_markup=kb
     )
+    
     await state.clear()
 
 # ===== СЕРВЕР =====
