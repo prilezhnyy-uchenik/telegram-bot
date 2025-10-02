@@ -173,5 +173,6 @@ def get_offer():
 async def main():
     await dp.start_polling(bot)
 
-if __name__ == "__main__": 
-    asyncio.run(main())
+if __name__ == "__main__":
+    threading.Thread(target=lambda: asyncio.run(run_bot())).start()
+    run_server()
