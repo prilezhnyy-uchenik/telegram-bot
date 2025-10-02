@@ -86,7 +86,7 @@ async def handle_diagnostic(message: types.Message):
     await message.answer(text, reply_markup=kb)
 
 # ---------- Годовой курс ----------
-@dp.message(F.text == "📅 Записаться на годовой курс")
+@dp.message(F.text == "📚 Записаться на годовой курс")
 async def handle_course(message: types.Message):
     text = (
         "Перед записью ознакомьтесь с условиями оферты:\n\n"
