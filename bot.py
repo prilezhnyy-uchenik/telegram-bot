@@ -170,7 +170,7 @@ def get_offer():
     return FileResponse("static/offer.pdf", media_type="application/pdf")
 
 # ---------- Запуск ----------
-async def start_bot():
+async def main():
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
