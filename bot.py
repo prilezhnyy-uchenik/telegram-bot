@@ -237,7 +237,6 @@ async def pay_month(callback: types.CallbackQuery):
         start_parameter="month_course",
         need_email=True,
         send_email_to_provider=True,
-        photo_url="https://i.imgur.com/xTq0vJp.png"  # логотип школы
     )
     await callback.answer()
 
@@ -256,7 +255,6 @@ async def pay_year(callback: types.CallbackQuery):
         start_parameter="year_course",
         need_email=True,
         send_email_to_provider=True,
-        photo_url="https://i.imgur.com/xTq0vJp.png"
     )
     await callback.answer()
 
