@@ -4,6 +4,8 @@ from datetime import datetime
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 import uvicorn
+from aiogram.types import LabeledPrice
+
 
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
@@ -11,6 +13,9 @@ from aiogram.filters import Command
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.memory import MemoryStorage
+
+# Токен на оплату
+PAYMENT_PROVIDER_TOKEN = os.getenv("PAYMENT_PROVIDER_TOKEN")
 
 # Берём токен из переменных окружения Railway
 TOKEN = os.getenv("BOT_TOKEN")
@@ -202,15 +207,11 @@ async def form_contact(message: types.Message, state: FSMContext):
         f"🆔 TelegramID: {message.from_user.id}"
     )
 
-    # Кнопки для оплаты
+    # Кнопки выбора тарифа
     kb = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(
-                text="💳 Оплатить месяц — 10 000 ₽",
-                url="https://yoomoney.ru/quickpay/shop-widget?writer=seller&targets=Оплата%20месяца&default-sum=10000&button-text=11&payment-type-choice=on&comment=on&successURL=https://t.me/YourBotUsername")],
-            [InlineKeyboardButton(
-                text="💳 Оплатить год — 75 000 ₽",
-                url="https://yoomoney.ru/quickpay/shop-widget?writer=seller&targets=Оплата%20года&default-sum=75000&button-text=11&payment-type-choice=on&comment=on&successURL=https://t.me/YourBotUsername")]
+            [InlineKeyboardButton(text="💳 Оплатить месяц — 10 000 ₽", callback_data="pay_month")],
+            [InlineKeyboardButton(text="💳 Оплатить год — 75 000 ₽", callback_data="pay_year")]
         ]
     )
 
@@ -221,6 +222,66 @@ async def form_contact(message: types.Message, state: FSMContext):
     )
     
     await state.clear()
+
+@dp.callback_query(F.data == "pay_month")
+async def pay_month(callback: types.CallbackQuery):
+    prices = [LabeledPrice(label="Оплата месяца обучения", amount=10000 * 100)]  # *100 = копейки
+    await bot.send_invoice(
+        chat_id=callback.from_user.id,
+        title="Месячный курс «ФизМатиум»",
+        description="Доступ к групповым занятиям по физике и математике (1 месяц).",
+        payload="month_course_payment",
+        provider_token=PAYMENT_PROVIDER_TOKEN,
+        currency="RUB",
+        prices=prices,
+        start_parameter="month_course",
+        need_email=True,
+        send_email_to_provider=True,
+        photo_url="https://i.imgur.com/xTq0vJp.png"  # логотип школы
+    )
+    await callback.answer()
+
+
+@dp.callback_query(F.data == "pay_year")
+async def pay_year(callback: types.CallbackQuery):
+    prices = [LabeledPrice(label="Оплата годового курса", amount=75000 * 100)]
+    await bot.send_invoice(
+        chat_id=callback.from_user.id,
+        title="Годовой курс «ФизМатиум»",
+        description="Групповой формат: 3 занятия в неделю (математика и физика).",
+        payload="year_course_payment",
+        provider_token=PAYMENT_PROVIDER_TOKEN,
+        currency="RUB",
+        prices=prices,
+        start_parameter="year_course",
+        need_email=True,
+        send_email_to_provider=True,
+        photo_url="https://i.imgur.com/xTq0vJp.png"
+    )
+    await callback.answer()
+
+@dp.message(F.successful_payment)
+async def successful_payment_handler(message: types.Message):
+    payment = message.successful_payment
+    amount = payment.total_amount // 100
+    description = payment.invoice_payload
+
+    await bot.send_message(
+        message.chat.id,
+        f"✅ Оплата прошла успешно!\n\n"
+        f"Сумма: {amount} ₽\n"
+        f"Курс: {'Годовой' if 'year' in description else 'Месячный'}\n\n"
+        f"Мы свяжемся с вами для подтверждения и добавления в группу 🙌"
+    )
+
+    await bot.send_message(
+        ADMIN_ID,
+        f"💰 Оплата получена!\n"
+        f"Пользователь: @{message.from_user.username or '—'} ({message.from_user.id})\n"
+        f"Сумма: {amount} ₽\n"
+        f"Описание: {description}"
+    )
+
 
 # ===== СЕРВЕР =====
 app = FastAPI()
