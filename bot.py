@@ -235,7 +235,7 @@ async def form_contact(message: types.Message, state: FSMContext):
 
 @dp.callback_query(F.data == "pay_month")
 async def pay_month(callback: types.CallbackQuery):
-    prices = [LabeledPrice(label="Оплата месяца обучения", amount=200 * 100)]  # *100 = копейки
+    prices = [LabeledPrice(label="Оплата месяца обучения", amount=10 * 100)]  # *100 = копейки
     await bot.send_invoice(
         chat_id=callback.from_user.id,
         title="Месячный курс «ФизМатиум»",
@@ -253,7 +253,7 @@ async def pay_month(callback: types.CallbackQuery):
 
 @dp.callback_query(F.data == "pay_year")
 async def pay_year(callback: types.CallbackQuery):
-    prices = [LabeledPrice(label="Оплата годового курса", amount=200 * 100)]
+    prices = [LabeledPrice(label="Оплата годового курса", amount=10 * 100)]
     await bot.send_invoice(
         chat_id=callback.from_user.id,
         title="Годовой курс «ФизМатиум»",
