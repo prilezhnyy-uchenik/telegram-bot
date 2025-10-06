@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 import uvicorn
 from aiogram.types import LabeledPrice
+from aiogram.types import PreCheckoutQuery
 
 
 from aiogram import Bot, Dispatcher, types, F
@@ -25,6 +26,15 @@ dp = Dispatcher(storage=MemoryStorage())
 
 # 👉 Укажи свой Telegram ID
 ADMIN_ID = 708095106
+
+# Обработка PreCheckoutQuery
+@dp.pre_checkout_query()
+async def process_pre_checkout(query: PreCheckoutQuery):
+    """
+    Telegram ожидает ответ на PreCheckoutQuery в течение 10 секунд.
+    Этот метод сообщает, что оплата возможна.
+    """
+    await bot.answer_pre_checkout_query(pre_checkout_query_id=query.id, ok=True)
 
 # ---------- Машина состояний ----------
 class BookingForm(StatesGroup):
@@ -257,6 +267,11 @@ async def pay_year(callback: types.CallbackQuery):
         send_email_to_provider=True,
     )
     await callback.answer()
+
+# 🟢 Обработчик PreCheckoutQuery
+@dp.pre_checkout_query()
+async def process_pre_checkout(query: PreCheckoutQuery):
+    await bot.answer_pre_checkout_query(pre_checkout_query_id=query.id, ok=True)
 
 @dp.message(F.successful_payment)
 async def successful_payment_handler(message: types.Message):
