@@ -261,23 +261,17 @@ async def pay_year(callback: types.CallbackQuery):
 @dp.message(F.successful_payment)
 async def successful_payment_handler(message: types.Message):
     payment = message.successful_payment
-    amount = payment.total_amount // 100
-    description = payment.invoice_payload
 
-    await bot.send_message(
-        message.chat.id,
-        f"✅ Оплата прошла успешно!\n\n"
-        f"Сумма: {amount} ₽\n"
-        f"Курс: {'Годовой' if 'year' in description else 'Месячный'}\n\n"
-        f"Мы свяжемся с вами для подтверждения и добавления в группу 🙌"
-    )
+    # Можно вывести данные о платеже в консоль (для теста)
+    print("=== УСПЕШНАЯ ОПЛАТА ===")
+    print("Сумма:", payment.total_amount / 100, payment.currency)
+    print("Платёжные данные:", payment.to_python())
 
-    await bot.send_message(
-        ADMIN_ID,
-        f"💰 Оплата получена!\n"
-        f"Пользователь: @{message.from_user.username or '—'} ({message.from_user.id})\n"
-        f"Сумма: {amount} ₽\n"
-        f"Описание: {description}"
+    # Просто ответ пользователю без отправки формы
+    await message.answer(
+        "✅ Оплата успешно прошла!\n\n"
+        "Спасибо за доверие 💙\n"
+        "Мы уже видим ваш платёж, доступ будет активирован в ближайшее время."
     )
 
 
