@@ -27,6 +27,15 @@ dp = Dispatcher(storage=MemoryStorage())
 # 👉 Укажи свой Telegram ID
 ADMIN_ID = 708095106
 
+# Обработка PreCheckoutQuery
+@dp.pre_checkout_query()
+async def process_pre_checkout(query: PreCheckoutQuery):
+    """
+    Telegram ожидает ответ на PreCheckoutQuery в течение 10 секунд.
+    Этот метод сообщает, что оплата возможна.
+    """
+    await bot.answer_pre_checkout_query(pre_checkout_query_id=query.id, ok=True)
+
 # ---------- Машина состояний ----------
 class BookingForm(StatesGroup):
     name = State()
@@ -190,8 +199,26 @@ async def form_contact(message: types.Message, state: FSMContext):
     await state.update_data(contact=message.text)
     data = await state.get_data()
 
-    # 🧩 Если это ГОДОВОЙ КУРС — не сохраняем и не отправляем админу
+    # Сохраняем в файл
+    with open("bookings.txt", "a", encoding="utf-8") as f:
+        f.write(
+            f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | {data['booking_type']} | "
+            f"{data['name']} | {data['school_class']} | {data['subject']} | {data['contact']} | TelegramID: {message.from_user.id}\n"
+        )
+
+    # Отправляем админу
+    await bot.send_message(
+        ADMIN_ID,
+        f"📩 Новая заявка ({data['booking_type']}):\n\n"
+        f"👤 ФИО: {data['name']}\n"
+        f"🏫 Класс: {data['school_class']}\n"
+        f"📘 Предмет: {data['subject']}\n"
+        f"☎ Контакт: {data['contact']}\n"
+        f"🆔 TelegramID: {message.from_user.id}"
+    )
+
     if data["booking_type"] == "Годовой курс":
+        # Кнопки оплаты только для годового курса
         kb = InlineKeyboardMarkup(
             inline_keyboard=[
                 [InlineKeyboardButton(text="💳 Оплатить месяц — 10 000 ₽", callback_data="pay_month")],
@@ -199,35 +226,19 @@ async def form_contact(message: types.Message, state: FSMContext):
             ]
         )
         await message.answer(
-            "✅ Форма заполнена!\n\n"
-            "Теперь выберите способ оплаты, чтобы завершить запись:",
+            "✅ Ваша заявка успешно принята!\n\n"
+            "Теперь выберите способ оплаты:",
             reply_markup=kb
         )
-
     else:
-        # 🧩 Диагностика или другие типы — сразу отправляем админу
-        with open("bookings.txt", "a", encoding="utf-8") as f:
-            f.write(
-                f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | {data['booking_type']} | "
-                f"{data['name']} | {data['school_class']} | {data['subject']} | {data['contact']} | TelegramID: {message.from_user.id}\n"
-            )
-
-        await bot.send_message(
-            ADMIN_ID,
-            f"📩 Новая заявка ({data['booking_type']}):\n\n"
-            f"👤 ФИО: {data['name']}\n"
-            f"🏫 Класс: {data['school_class']}\n"
-            f"📘 Предмет: {data['subject']}\n"
-            f"☎ Контакт: {data['contact']}\n"
-            f"🆔 TelegramID: {message.from_user.id}"
-        )
-
+        # Без оплаты для диагностики или других типов
         await message.answer(
             "✅ Ваша заявка успешно принята!\n\n"
-            "Мы свяжемся с вами в ближайшее время 💬"
+            "Мы свяжемся с вами в ближайшее время для уточнения деталей. 💬"
         )
 
-    # ❗ Не очищаем состояние — нужно для оплаты
+    
+    await state.clear()
 
 @dp.callback_query(F.data == "pay_month")
 async def pay_month(callback: types.CallbackQuery):
@@ -270,42 +281,20 @@ async def process_pre_checkout(query: PreCheckoutQuery):
     await bot.answer_pre_checkout_query(pre_checkout_query_id=query.id, ok=True)
 
 @dp.message(F.successful_payment)
-async def successful_payment_handler(message: types.Message, state: FSMContext):
+async def successful_payment_handler(message: types.Message):
     payment = message.successful_payment
-    data = await state.get_data()
 
+    # Можно вывести данные о платеже в консоль (для теста)
     print("=== УСПЕШНАЯ ОПЛАТА ===")
     print("Сумма:", payment.total_amount / 100, payment.currency)
+    print("Платёжные данные:", payment.to_python())
 
-    # ✅ После успешной оплаты — отправляем админу данные формы
-    if data and data.get("booking_type") == "Годовой курс":
-        await bot.send_message(
-            ADMIN_ID,
-            f"💰 Оплата подтверждена!\n\n"
-            f"📚 <b>Годовой курс</b>\n"
-            f"👤 ФИО: {data['name']}\n"
-            f"🏫 Класс: {data['school_class']}\n"
-            f"📘 Предмет: {data['subject']}\n"
-            f"☎ Контакт: {data['contact']}\n"
-            f"🆔 TelegramID: {message.from_user.id}\n\n"
-            f"💳 Сумма: {payment.total_amount / 100} {payment.currency}"
-        )
-
-        # Записываем в файл только после оплаты
-        with open("bookings.txt", "a", encoding="utf-8") as f:
-            f.write(
-                f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | {data['booking_type']} | "
-                f"{data['name']} | {data['school_class']} | {data['subject']} | {data['contact']} | TelegramID: {message.from_user.id} | Оплачено: {payment.total_amount / 100} {payment.currency}\n"
-            )
-
+    # Просто ответ пользователю без отправки формы
     await message.answer(
         "✅ Оплата успешно прошла!\n\n"
         "Спасибо за доверие 💙\n"
         "Мы уже видим ваш платёж, доступ будет активирован в ближайшее время."
     )
-
-    await state.clear()
-
 
 
 # ===== СЕРВЕР =====
