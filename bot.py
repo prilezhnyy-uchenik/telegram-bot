@@ -128,6 +128,30 @@ async def handle_course(message: types.Message):
 
     await message.answer(text, reply_markup=kb)
 
+# ---------- Индивидуальное занятие ----------
+@dp.message(F.text == "👨‍🏫 Индивидуальное занятие")
+async def handle_individual(message: types.Message):
+    text = (
+        "Перед записью ознакомьтесь с условиями оферты:\n\n"
+        "Дальнейшее обучение осуществляется на платной основе. "
+        "Нажимая кнопку ниже, вы соглашаетесь с условиями."
+    )
+
+    kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="✅ Согласен(а)", callback_data="individual_accept")],
+            [InlineKeyboardButton(
+                text="📝 Согласие на обработку персональных данных (PDF)",
+                url="https://telegram-bot-production-534b.up.railway.app/consent")],
+            [InlineKeyboardButton(
+                text="📝 Полная оферта (PDF)",
+                url="https://telegram-bot-production-534b.up.railway.app/offer")]
+        ]
+    )
+
+    await message.answer(text, reply_markup=kb)
+
+
 # ---------- О школе ----------
 @dp.message(F.text == "ℹ️ О школе")
 async def handle_about(message: types.Message):
@@ -176,6 +200,10 @@ async def diagnostic_accept(callback: types.CallbackQuery, state: FSMContext):
 async def course_accept(callback: types.CallbackQuery, state: FSMContext):
     await start_form(callback, state, "Годовой курс")
 
+@dp.callback_query(F.data == "individual_accept")
+async def individual_accept(callback: types.CallbackQuery, state: FSMContext):
+    await start_form(callback, state, "Индивидуальное занятие")
+
 @dp.callback_query(F.data.contains("personal"))
 async def personal_data(callback: types.CallbackQuery):
     await callback.answer()
@@ -204,8 +232,10 @@ async def form_contact(message: types.Message, state: FSMContext):
     await state.update_data(contact=message.text)
     data = await state.get_data()
 
-    if data["booking_type"] == "Годовой курс":
-        # сохраняем данные в память (до оплаты)
+    booking_type = data["booking_type"]
+
+    # === ГОДОВОЙ КУРС ===
+    if booking_type == "Годовой курс":
         pending_forms[message.from_user.id] = data
 
         kb = InlineKeyboardMarkup(
@@ -220,18 +250,33 @@ async def form_contact(message: types.Message, state: FSMContext):
             reply_markup=kb
         )
 
+    # === ИНДИВИДУАЛЬНОЕ ЗАНЯТИЕ ===
+    elif booking_type == "Индивидуальное занятие":
+        pending_forms[message.from_user.id] = data
+
+        kb = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [InlineKeyboardButton(text="💳 Оплатить занятие — 2 500 ₽", callback_data="pay_individual")]
+            ]
+        )
+        await message.answer(
+            "✅ Форма заполнена!\n\n"
+            "Теперь оплатите первое индивидуальное занятие:",
+            reply_markup=kb
+        )
+
+    # === ДИАГНОСТИКА (бесплатная) ===
     else:
-        # Для диагностики или индивидуальных занятий сразу сохраняем и отправляем админу
         with open("bookings.txt", "a", encoding="utf-8") as f:
             f.write(
-                f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | {data['booking_type']} | "
+                f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | {booking_type} | "
                 f"{data['name']} | {data['school_class']} | {data['subject']} | "
                 f"{data['contact']} | TelegramID: {message.from_user.id}\n"
             )
 
         await bot.send_message(
             ADMIN_ID,
-            f"📩 Новая заявка ({data['booking_type']}):\n\n"
+            f"📩 Новая заявка ({booking_type}):\n\n"
             f"👤 ФИО: {data['name']}\n"
             f"🏫 Класс: {data['school_class']}\n"
             f"📘 Предмет: {data['subject']}\n"
@@ -242,6 +287,7 @@ async def form_contact(message: types.Message, state: FSMContext):
         await message.answer("✅ Ваша заявка успешно принята! Мы скоро свяжемся 💬")
 
     await state.clear()
+
 
 
 @dp.callback_query(F.data == "pay_month")
@@ -278,6 +324,24 @@ async def pay_year(callback: types.CallbackQuery):
         send_email_to_provider=True,
     )
     await callback.answer()
+
+@dp.callback_query(F.data == "pay_individual")
+async def pay_individual(callback: types.CallbackQuery):
+    prices = [LabeledPrice(label="Индивидуальное занятие", amount=2500 * 100)]  # *100 = копейки
+    await bot.send_invoice(
+        chat_id=callback.from_user.id,
+        title="Индивидуальное занятие «ФизМатиум»",
+        description="90-минутное онлайн-занятие с преподавателем по выбранному предмету.",
+        payload="individual_lesson_payment",
+        provider_token=PAYMENT_PROVIDER_TOKEN,
+        currency="RUB",
+        prices=prices,
+        start_parameter="individual_lesson",
+        need_email=True,
+        send_email_to_provider=True,
+    )
+    await callback.answer()
+
 
 
 @dp.message(F.successful_payment)
