@@ -27,15 +27,6 @@ dp = Dispatcher(storage=MemoryStorage())
 # 👉 Укажи свой Telegram ID
 ADMIN_ID = 708095106
 
-# Обработка PreCheckoutQuery
-@dp.pre_checkout_query()
-async def process_pre_checkout(query: PreCheckoutQuery):
-    """
-    Telegram ожидает ответ на PreCheckoutQuery в течение 10 секунд.
-    Этот метод сообщает, что оплата возможна.
-    """
-    await bot.answer_pre_checkout_query(pre_checkout_query_id=query.id, ok=True)
-
 # ---------- Машина состояний ----------
 class BookingForm(StatesGroup):
     name = State()
@@ -241,6 +232,7 @@ async def form_contact(message: types.Message, state: FSMContext):
 @dp.callback_query(F.data == "pay_month")
 async def pay_month(callback: types.CallbackQuery):
     prices = [LabeledPrice(label="Оплата месяца обучения", amount=100 * 100)]  # *100 = копейки
+    print(await state.get_data())
     await bot.send_invoice(
         chat_id=callback.from_user.id,
         title="Месячный курс «ФизМатиум»",
