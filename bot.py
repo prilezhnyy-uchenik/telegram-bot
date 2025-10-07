@@ -217,19 +217,26 @@ async def form_contact(message: types.Message, state: FSMContext):
         f"🆔 TelegramID: {message.from_user.id}"
     )
 
-    # Кнопки выбора тарифа
-    kb = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [InlineKeyboardButton(text="💳 Оплатить месяц — 10 000 ₽", callback_data="pay_month")],
-            [InlineKeyboardButton(text="💳 Оплатить год — 75 000 ₽", callback_data="pay_year")]
-        ]
-    )
+    if data["booking_type"] == "Годовой курс":
+        # Кнопки оплаты только для годового курса
+        kb = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [InlineKeyboardButton(text="💳 Оплатить месяц — 10 000 ₽", callback_data="pay_month")],
+                [InlineKeyboardButton(text="💳 Оплатить год — 75 000 ₽", callback_data="pay_year")]
+            ]
+        )
+        await message.answer(
+            "✅ Ваша заявка успешно принята!\n\n"
+            "Теперь выберите способ оплаты:",
+            reply_markup=kb
+        )
+    else:
+        # Без оплаты для диагностики или других типов
+        await message.answer(
+            "✅ Ваша заявка успешно принята!\n\n"
+            "Мы свяжемся с вами в ближайшее время для уточнения деталей. 💬"
+        )
 
-    await message.answer(
-        "✅ Ваша заявка успешно принята!\n\n"
-        "Теперь выберите способ оплаты:",
-        reply_markup=kb
-    )
     
     await state.clear()
 
