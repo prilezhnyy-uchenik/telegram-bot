@@ -264,6 +264,7 @@ async def form_contact(message: types.Message, state: FSMContext):
         kb = InlineKeyboardMarkup(
             inline_keyboard=[
                 [InlineKeyboardButton(text="💳 Оплатить месяц — 10 000 ₽", callback_data="pay_month")],
+                [InlineKeyboardButton(text="💳 Оплатить комбо — 18 000 ₽", callback_data="pay_combo")],
                 [InlineKeyboardButton(text="💳 Оплатить год — 75 000 ₽", callback_data="pay_year")]
             ]
         )
@@ -329,6 +330,27 @@ async def pay_month(callback: types.CallbackQuery):
         send_email_to_provider=True,
     )
     await callback.answer()
+
+@dp.callback_query(F.data == "pay_combo")
+async def pay_combo(callback: types.CallbackQuery):
+    prices = [LabeledPrice(label="Оплата комбо-курса", amount=100 * 100)]  # *100 = копейки
+    await bot.send_invoice(
+        chat_id=callback.from_user.id,
+        title="Комбо-курс «ФизМатиум»",
+        description=(
+            "Полный доступ к годовым курсам по физике и математике.\n"
+            "Формат: 3 занятия в неделю по каждому предмету, доступ к материалам и пробникам."
+        ),
+        payload="combo_course_payment",
+        provider_token=PAYMENT_PROVIDER_TOKEN,
+        currency="RUB",
+        prices=prices,
+        start_parameter="combo_course",
+        need_email=True,
+        send_email_to_provider=True,
+    )
+    await callback.answer()
+
 
 
 @dp.callback_query(F.data == "pay_year")
