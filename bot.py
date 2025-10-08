@@ -76,10 +76,11 @@ async def handle_prices(message: types.Message):
         "• Формат: 3 занятия в неделю(математика или физика) + регулярное домашнее задание, "
         " которое проверяет преподаватель и даёт конкретные и подробные "
         " комментарии по ошибкам, длительность одного занятия 90 минут, онлайн\n"
-        "• Включает: доступ к материалам, домашним заданиям,  пробникам\n"
+        "• Включает: доступ к материалам, домашним заданиям, пробникам\n"
         "• Стоимость:\n"
         "   • 10 000 ₽ / месяц\n"
-        "   • 75 000 ₽ / за год (экономия 15 000 ₽)"
+        "   • 18 000 ₽ / месяц - комбо\n"
+        "   • 75 000 ₽ / год (экономия 15 000 ₽)"
     )
     await message.answer(text, parse_mode="HTML")
 
@@ -320,7 +321,7 @@ async def pay_month(callback: types.CallbackQuery):
     await bot.send_invoice(
         chat_id=callback.from_user.id,
         title="Месячный курс «ФизМатиум»",
-        description="Доступ к групповым занятиям по физике иили математике (1 месяц).",
+        description="Доступ к групповым занятиям по математике или физике (1 месяц, 3 раза в неделю).",
         payload="month_course_payment",
         provider_token=PAYMENT_PROVIDER_TOKEN,
         currency="RUB",
@@ -337,10 +338,7 @@ async def pay_combo(callback: types.CallbackQuery):
     await bot.send_invoice(
         chat_id=callback.from_user.id,
         title="Комбо-курс «ФизМатиум»",
-        description=(
-            "Полный доступ к годовым курсам по физике и математике.\n"
-            "Формат: 3 занятия в неделю по каждому предмету, доступ к материалам и пробникам."
-        ),
+        description="Доступ к групповым занятиям по математике и физике  (1 месяц, 6 раз в неделю).",
         payload="combo_course_payment",
         provider_token=PAYMENT_PROVIDER_TOKEN,
         currency="RUB",
@@ -359,7 +357,7 @@ async def pay_year(callback: types.CallbackQuery):
     await bot.send_invoice(
         chat_id=callback.from_user.id,
         title="Годовой курс «ФизМатиум»",
-        description="Групповой формат: 3 занятия в неделю (математика или физика).",
+        description="Доступ к групповым занятиям по математике или физике  (1 год, 3 раза в неделю).",
         payload="year_course_payment",
         provider_token=PAYMENT_PROVIDER_TOKEN,
         currency="RUB",
