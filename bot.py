@@ -53,8 +53,7 @@ async def send_welcome(message: types.Message):
         keyboard=[
             [KeyboardButton(text="📊 Тарифы и цены")], 
             [KeyboardButton(text="📅 Записаться на диагностику")],
-            [KeyboardButton(text="📚 Записаться на годовой курс")],
-            [KeyboardButton(text="👨‍🏫 Индивидуальное занятие")],
+            [KeyboardButton(text="📚 Записаться на годовой курс"), KeyboardButton(text="👨‍🏫 Индивидуальное занятие")],
             [KeyboardButton(text="ℹ️ О школе"), KeyboardButton(text="📂 Материалы")]
         ],
         resize_keyboard=True
