@@ -178,6 +178,30 @@ async def handle_about(message: types.Message):
     await message.answer(text, parse_mode="HTML")
 
 
+    # ---------- Материалы ----------
+@dp.message(F.text == "📂 Материалы")
+async def handle_materials(message: types.Message):
+    text = "📚 Выберите нужный материал для скачивания:"
+    kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(
+                text="📘 Физика ЕГЭ",
+                url="https://telegram-bot-production-534b.up.railway.app/materials/physics_ege")],
+            [InlineKeyboardButton(
+                text="📗 Физика ОГЭ",
+                url="https://telegram-bot-production-534b.up.railway.app/materials/physics_oge")],
+            [InlineKeyboardButton(
+                text="📙 Стереометрия",
+                url="https://telegram-bot-production-534b.up.railway.app/materials/stereometry")],
+            [InlineKeyboardButton(
+                text="📕 Геометрия ОГЭ + ЕГЭ",
+                url="https://telegram-bot-production-534b.up.railway.app/materials/geometry")]
+        ]
+    )
+    await message.answer(text, reply_markup=kb)
+
+
+
 # ---------- Обработка согласия (общая функция) ----------
 async def start_form(callback: types.CallbackQuery, state: FSMContext, booking_type: str):
     user_id = callback.from_user.id
@@ -399,6 +423,23 @@ def get_offer():
 @app.get("/consent")
 def get_consent():
     return FileResponse("static/consent.pdf", media_type="application/pdf")
+
+@app.get("/physics_ege")
+def get_physics_ege():
+    return FileResponse("static/physics_ege.pdf", media_type="application/pdf")
+
+@app.get("/physics_oge")
+def get_physics_oge():
+    return FileResponse("static/physics_oge.pdf", media_type="application/pdf")
+
+@app.get("/stereometry")
+def get_stereometry():
+    return FileResponse("static/stereometry.pdf", media_type="application/pdf")
+
+@app.get("/geometry")
+def get_geometry():
+    return FileResponse("static/geometry.pdf", media_type="application/pdf")
+
 
 # ---------- Запуск ----------
 async def start_bot():
