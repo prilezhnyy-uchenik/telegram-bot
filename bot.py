@@ -186,16 +186,16 @@ async def handle_materials(message: types.Message):
         inline_keyboard=[
             [InlineKeyboardButton(
                 text="📘 Физика ЕГЭ",
-                url="https://telegram-bot-production-534b.up.railway.app/materials/physics_ege")],
+                url="https://telegram-bot-production-534b.up.railway.app/physics_ege")],
             [InlineKeyboardButton(
                 text="📗 Физика ОГЭ",
-                url="https://telegram-bot-production-534b.up.railway.app/materials/physics_oge")],
+                url="https://telegram-bot-production-534b.up.railway.app/physics_oge")],
             [InlineKeyboardButton(
                 text="📙 Стереометрия",
-                url="https://telegram-bot-production-534b.up.railway.app/materials/stereometry")],
+                url="https://telegram-bot-production-534b.up.railway.app/stereometry")],
             [InlineKeyboardButton(
                 text="📕 Геометрия ОГЭ + ЕГЭ",
-                url="https://telegram-bot-production-534b.up.railway.app/materials/geometry")]
+                url="https://telegram-bot-production-534b.up.railway.app/geometry")]
         ]
     )
     await message.answer(text, reply_markup=kb)
