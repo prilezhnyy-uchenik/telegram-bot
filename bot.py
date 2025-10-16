@@ -317,7 +317,7 @@ async def form_contact(message: types.Message, state: FSMContext):
 
 @dp.callback_query(F.data == "pay_month")
 async def pay_month(callback: types.CallbackQuery):
-    prices = [LabeledPrice(label="Оплата месяца обучения", amount=100 * 100)]  # *100 = копейки
+    prices = [LabeledPrice(label="Оплата месяца обучения", amount=10000 * 100)]  # *100 = копейки
     await bot.send_invoice(
         chat_id=callback.from_user.id,
         title="Месячный курс «ФизМатиум»",
@@ -334,7 +334,7 @@ async def pay_month(callback: types.CallbackQuery):
 
 @dp.callback_query(F.data == "pay_combo")
 async def pay_combo(callback: types.CallbackQuery):
-    prices = [LabeledPrice(label="Оплата комбо-курса", amount=100 * 100)]  # *100 = копейки
+    prices = [LabeledPrice(label="Оплата комбо-курса", amount=18000 * 100)]  # *100 = копейки
     await bot.send_invoice(
         chat_id=callback.from_user.id,
         title="Комбо-курс «ФизМатиум»",
@@ -353,7 +353,7 @@ async def pay_combo(callback: types.CallbackQuery):
 
 @dp.callback_query(F.data == "pay_year")
 async def pay_year(callback: types.CallbackQuery):
-    prices = [LabeledPrice(label="Оплата годового курса", amount=100 * 100)]
+    prices = [LabeledPrice(label="Оплата годового курса", amount=75000 * 100)]
     await bot.send_invoice(
         chat_id=callback.from_user.id,
         title="Годовой курс «ФизМатиум»",
@@ -370,7 +370,7 @@ async def pay_year(callback: types.CallbackQuery):
 
 @dp.callback_query(F.data == "pay_individual")
 async def pay_individual(callback: types.CallbackQuery):
-    prices = [LabeledPrice(label="Индивидуальное занятие", amount=100 * 100)]  # *100 = копейки
+    prices = [LabeledPrice(label="Индивидуальное занятие", amount=2500 * 100)]  # *100 = копейки
     await bot.send_invoice(
         chat_id=callback.from_user.id,
         title="Индивидуальное занятие «ФизМатиум»",
