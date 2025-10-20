@@ -463,6 +463,42 @@ def get_geometry():
 def get_image_1():
     return FileResponse("static/1.jpg", media_type="image/jpeg")
 
+@app.get("/image_2")
+def get_image_2():
+    return FileResponse("static/2.jpg", media_type="image/jpeg")
+
+@app.get("/image_3")
+def get_image_3():
+    return FileResponse("static/3.jpg", media_type="image/jpeg")
+
+@app.get("/image_4")
+def get_image_4():
+    return FileResponse("static/4.jpg", media_type="image/jpeg")
+
+@app.get("/image_5")
+def get_image_5():
+    return FileResponse("static/5.jpg", media_type="image/jpeg")
+
+@app.get("/image_6")
+def get_image_6():
+    return FileResponse("static/6.jpg", media_type="image/jpeg")
+
+@app.get("/image_7")
+def get_image_7():
+    return FileResponse("static/7.jpg", media_type="image/jpeg")
+
+@app.get("/image_8")
+def get_image_8():
+    return FileResponse("static/8.jpg", media_type="image/jpeg")
+
+@app.get("/image_9")
+def get_image_9():
+    return FileResponse("static/9.jpg", media_type="image/jpeg")
+
+@app.get("/image_10")
+def get_image_10():
+    return FileResponse("static/10.jpg", media_type="image/jpeg")
+
 
 
 # ---------- Запуск ----------
