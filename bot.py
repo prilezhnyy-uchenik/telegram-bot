@@ -459,6 +459,11 @@ def get_stereometry():
 def get_geometry():
     return FileResponse("static/geometry.pdf", media_type="application/pdf")
 
+@app.get("/image_1")
+def get_image_1():
+    return FileResponse("static/images/1.jpg", media_type="image/jpeg")
+
+
 
 # ---------- Запуск ----------
 async def start_bot():
