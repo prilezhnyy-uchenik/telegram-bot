@@ -523,6 +523,10 @@ def get_image_9():
 def get_image_10():
     return FileResponse("static/10.jpg", media_type="image/jpeg")
 
+@app.get("/image_11")
+def get_image_11():
+    return FileResponse("static/11.jpg", media_type="image/jpeg")
+
 
 
 # ---------- Запуск ----------
