@@ -373,7 +373,7 @@ async def pay_2weeks_combo(callback: types.CallbackQuery):
     await bot.send_invoice(
         chat_id=callback.from_user.id,
         title="Комбо-курс «ФизМатиум» на 2 недели",
-        description="Доступ к групповым занятиям по математике и физике (2 недели, 6 занятий в неделю).",
+        description="Доступ к групповым занятиям по математике и физике (2 недели, 6 раз в неделю).",
         payload="2weeks_combo_course_payment",
         provider_token=PAYMENT_PROVIDER_TOKEN,
         currency="RUB",
