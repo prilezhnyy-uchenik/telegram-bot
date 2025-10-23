@@ -261,9 +261,9 @@ async def form_contact(message: types.Message, state: FSMContext):
 
         kb = InlineKeyboardMarkup(
             inline_keyboard=[
+                [InlineKeyboardButton(text="💳 Оплатить 2 недели — 5 000 ₽", callback_data="pay_2weeks")],
                 [InlineKeyboardButton(text="💳 Оплатить месяц — 10 000 ₽", callback_data="pay_month")],
-                [InlineKeyboardButton(text="💳 Оплатить комбо — 18 000 ₽", callback_data="pay_combo")],
-                [InlineKeyboardButton(text="💳 Оплатить год — 75 000 ₽", callback_data="pay_year")]
+                [InlineKeyboardButton(text="💳 Оплатить комбо — 18 000 ₽", callback_data="pay_combo")]
             ]
         )
         await message.answer(
@@ -317,7 +317,7 @@ async def pay_month(callback: types.CallbackQuery):
     prices = [LabeledPrice(label="Оплата месяца обучения", amount=10000 * 100)]  # *100 = копейки
     await bot.send_invoice(
         chat_id=callback.from_user.id,
-        title="Месячный курс «ФизМатиум»",
+        title="Годовой курс «ФизМатиум», на месяц",
         description="Доступ к групповым занятиям по математике или физике (1 месяц, 3 раза в неделю).",
         payload="month_course_payment",
         provider_token=PAYMENT_PROVIDER_TOKEN,
@@ -348,22 +348,23 @@ async def pay_combo(callback: types.CallbackQuery):
 
 
 
-@dp.callback_query(F.data == "pay_year")
-async def pay_year(callback: types.CallbackQuery):
-    prices = [LabeledPrice(label="Оплата годового курса", amount=75000 * 100)]
+@dp.callback_query(F.data == "pay_2weeks")
+async def pay_2weeks(callback: types.CallbackQuery):
+    prices = [LabeledPrice(label="Оплата 2 недель обучения", amount=5000 * 100)]  # 5000 ₽
     await bot.send_invoice(
         chat_id=callback.from_user.id,
-        title="Годовой курс «ФизМатиум»",
-        description="Доступ к групповым занятиям по математике или физике  (1 год, 3 раза в неделю).",
-        payload="year_course_payment",
+        title="Годовой курс «ФизМатиум», на 2 недели",
+        description="Доступ к групповым занятиям по математике или физике (2 недели, 3 раза в неделю).",
+        payload="2weeks_course_payment",
         provider_token=PAYMENT_PROVIDER_TOKEN,
         currency="RUB",
         prices=prices,
-        start_parameter="year_course",
+        start_parameter="2weeks_course",
         need_email=True,
         send_email_to_provider=True,
     )
     await callback.answer()
+
 
 @dp.callback_query(F.data == "pay_individual")
 async def pay_individual(callback: types.CallbackQuery):
