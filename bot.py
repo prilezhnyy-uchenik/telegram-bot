@@ -262,8 +262,9 @@ async def form_contact(message: types.Message, state: FSMContext):
         kb = InlineKeyboardMarkup(
             inline_keyboard=[
                 [InlineKeyboardButton(text="💳 Оплатить 2 недели — 5 000 ₽", callback_data="pay_2weeks")],
+                [InlineKeyboardButton(text="💳 Оплатить 2 недели (комбо) — 9 000 ₽", callback_data="pay_2weeks_combo")],
                 [InlineKeyboardButton(text="💳 Оплатить месяц — 10 000 ₽", callback_data="pay_month")],
-                [InlineKeyboardButton(text="💳 Оплатить комбо — 18 000 ₽", callback_data="pay_combo")]
+                [InlineKeyboardButton(text="💳 Оплатить месяц(комбо) — 18 000 ₽", callback_data="pay_combo")]
             ]
         )
         await message.answer(
@@ -331,10 +332,10 @@ async def pay_month(callback: types.CallbackQuery):
 
 @dp.callback_query(F.data == "pay_combo")
 async def pay_combo(callback: types.CallbackQuery):
-    prices = [LabeledPrice(label="Оплата комбо-курса", amount=18000 * 100)]  # *100 = копейки
+    prices = [LabeledPrice(label="Оплата комбо-курса на месяц", amount=18000 * 100)]  # *100 = копейки
     await bot.send_invoice(
         chat_id=callback.from_user.id,
-        title="Комбо-курс «ФизМатиум»",
+        title="Комбо-курс «ФизМатиум» на месяц",
         description="Доступ к групповым занятиям по математике и физике  (1 месяц, 6 раз в неделю).",
         payload="combo_course_payment",
         provider_token=PAYMENT_PROVIDER_TOKEN,
@@ -364,6 +365,25 @@ async def pay_2weeks(callback: types.CallbackQuery):
         send_email_to_provider=True,
     )
     await callback.answer()
+
+
+@dp.callback_query(F.data == "pay_2weeks_combo")
+async def pay_2weeks_combo(callback: types.CallbackQuery):
+    prices = [LabeledPrice(label="Оплата комбо-курса на 2 недели (мат + физ)", amount=9000 * 100)]  # 9000 ₽
+    await bot.send_invoice(
+        chat_id=callback.from_user.id,
+        title="Комбо-курс «ФизМатиум» на 2 недели",
+        description="Доступ к групповым занятиям по математике и физике (2 недели, 6 занятий в неделю).",
+        payload="2weeks_combo_course_payment",
+        provider_token=PAYMENT_PROVIDER_TOKEN,
+        currency="RUB",
+        prices=prices,
+        start_parameter="2weeks_combo_course",
+        need_email=True,
+        send_email_to_provider=True,
+    )
+    await callback.answer()
+
 
 
 @dp.callback_query(F.data == "pay_individual")
