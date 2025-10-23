@@ -527,6 +527,48 @@ def get_image_10():
 def get_image_11():
     return FileResponse("static/11.jpg", media_type="image/jpeg")
 
+@app.get("/image_12")
+def get_image_12():
+    return FileResponse("static/12.jpg", media_type="image/jpeg")
+
+@app.get("/image_13")
+def get_image_13():
+    return FileResponse("static/13.jpg", media_type="image/jpeg")
+
+@app.get("/image_14")
+def get_image_14():
+    return FileResponse("static/14.jpg", media_type="image/jpeg")
+
+@app.get("/image_15")
+def get_image_15():
+    return FileResponse("static/15.jpg", media_type="image/jpeg")
+
+@app.get("/image_16")
+def get_image_16():
+    return FileResponse("static/16.jpg", media_type="image/jpeg")
+
+@app.get("/image_17")
+def get_image_17():
+    return FileResponse("static/17.jpg", media_type="image/jpeg")
+
+@app.get("/image_18")
+def get_image_18():
+    return FileResponse("static/18.jpg", media_type="image/jpeg")
+
+@app.get("/image_19")
+def get_image_19():
+    return FileResponse("static/19.jpg", media_type="image/jpeg")
+
+@app.get("/image_20")
+def get_image_20():
+    return FileResponse("static/20.jpg", media_type="image/jpeg")
+
+@app.get("/image_21")
+def get_image_21():
+    return FileResponse("static/21.jpg", media_type="image/jpeg")
+
+
+
 
 
 # ---------- Запуск ----------
