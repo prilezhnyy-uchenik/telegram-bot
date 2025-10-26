@@ -547,10 +547,6 @@ def get_image_15():
 def get_image_16():
     return FileResponse("static/16.jpg", media_type="image/jpeg")
 
-@app.get("/image_17")
-def get_image_17():
-    return FileResponse("static/17.jpg", media_type="image/jpeg")
-
 @app.get("/image_18")
 def get_image_18():
     return FileResponse("static/18.jpg", media_type="image/jpeg")
@@ -566,6 +562,10 @@ def get_image_20():
 @app.get("/image_21")
 def get_image_21():
     return FileResponse("static/21.jpg", media_type="image/jpeg")
+
+@app.get("/image_22")
+def get_image_22():
+    return FileResponse("static/22.jpg", media_type="image/jpeg")
 
 
 
