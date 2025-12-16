@@ -573,17 +573,10 @@ def get_image_23():
 
 # ---------- Запуск ----------
 async def start_bot():
-    await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
 async def start_server():
-    config = uvicorn.Config(
-        app,
-        host="0.0.0.0",
-        port=int(os.getenv("PORT", 8000)),
-        loop="asyncio",
-        lifespan="off"
-    )
+    config = uvicorn.Config(app, host="0.0.0.0", port=int(os.getenv("PORT", 8000)))
     server = uvicorn.Server(config)
     await server.serve()
 
@@ -595,4 +588,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
