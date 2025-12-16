@@ -1,8 +1,3 @@
-print("BOT_TOKEN =", os.getenv("BOT_TOKEN"))
-print("PAYMENT_PROVIDER_TOKEN =", os.getenv("PAYMENT_PROVIDER_TOKEN"))
-
-
-
 import asyncio
 import os
 from datetime import datetime
