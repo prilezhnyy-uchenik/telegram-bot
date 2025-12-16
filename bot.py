@@ -572,19 +572,10 @@ def get_image_23():
 
 
 # ---------- Запуск ----------
-async def start_bot():
-    await dp.start_polling(bot)
+# --- запуск Telegram-бота через FastAPI startup ---
 
-async def start_server():
-    config = uvicorn.Config(app, host="0.0.0.0", port=int(os.getenv("PORT", 8000)))
-    server = uvicorn.Server(config)
-    await server.serve()
+@app.on_event("startup")
+async def on_startup():
+    await bot.delete_webhook(drop_pending_updates=True)
+    asyncio.create_task(dp.start_polling(bot))
 
-async def main():
-    await asyncio.gather(
-        start_bot(),
-        start_server()
-    )
-
-if __name__ == "__main__":
-    asyncio.run(main())
